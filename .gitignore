@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+dist/
+.env
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs y editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Compilados
+*.class
+*.exe
+*.out
+*.o
+*.pyc
