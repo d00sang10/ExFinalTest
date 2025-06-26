@@ -1,0 +1,111 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Cliente {
+    id_cliente Int @id @default(autoincrement()) //❌
+
+    nombre   String // ✅
+    email    String? @unique // ✅
+    telefono String? // ✅
+
+    estado_auditoria    String    @default("1") @db.Char(1) //❌
+    fecha_creacion      DateTime  @default(now()) //❌
+    fecha_actualizacion DateTime? //❌
+
+    ventas Venta[]
+
+    @@map("cliente")
+}
+
+model proveedor {
+    id_proveedor Int @id @default(autoincrement()) //❌
+
+    nombre   String // ✅
+    contacto String? @db.VarChar(50) // ✅
+    telefono String? @unique // ✅
+    email    String  @unique // ✅
+
+    estado_auditoria    String?   @default("1") @db.Char(1) //❌
+    fecha_creacion      DateTime? @default(now()) //❌
+    fecha_actualizacion DateTime? //❌
+
+    productos Producto[] // relación 1:N
+
+    @@map("proveedor")
+}
+
+model Producto {
+    id_producto Int @id @default(autoincrement()) //❌
+
+    nombre       String // ✅
+    descripcion  String? // ✅
+    precio       Decimal @db.Decimal(10, 2) // ✅
+    id_proveedor Int? // ✅ // COLUMN, CAMPO, FK
+
+    estado_auditoria    String?   @default("1") @db.Char(1) //❌
+    fecha_creacion      DateTime? @default(now()) //❌
+    fecha_actualizacion DateTime? //❌
+
+    proveedor      proveedor?     @relation(fields: [id_proveedor], references: [id_proveedor], onUpdate: Cascade, onDelete: SetNull)
+    inventario     Inventario?
+    detalle_ventas DetalleVenta[]
+
+    @@map("producto")
+}
+
+model Inventario {
+    id_producto          Int      @id // ✅ FK
+    stock                Int // ✅
+    ultima_actualizacion DateTime @default(now()) // 🟡
+
+    estado_auditoria    String?   @default("1") @db.Char(1) //❌
+    fecha_creacion      DateTime? @default(now()) //❌
+    fecha_actualizacion DateTime? //❌
+
+    producto Producto @relation(fields: [id_producto], references: [id_producto], onUpdate: Cascade, onDelete: Cascade)
+
+    @@map("inventario")
+}
+
+model Venta {
+    id_venta Int @id @default(autoincrement()) //❌
+
+    id_cliente Int? // ✅ FK
+
+    fecha_venta DateTime @default(now()) // 🟡
+    total       Decimal? @db.Decimal(10, 2) // ✅
+
+    estado_auditoria    String?   @default("1") @db.Char(1) //❌
+    fecha_creacion      DateTime? @default(now()) //❌ 
+    fecha_actualizacion DateTime? //❌
+
+    cliente        Cliente?       @relation(fields: [id_cliente], references: [id_cliente], onUpdate: Cascade, onDelete: SetNull)
+    detalle_ventas DetalleVenta[]
+
+    @@map("venta")
+}
+
+model DetalleVenta {
+    id_detalle Int @id @default(autoincrement()) //❌
+
+    id_venta    Int // ✅
+    id_producto Int // ✅
+
+    cantidad Int // ✅
+    subtotal Decimal @db.Decimal(10, 2) // ✅
+
+    estado_auditoria    String?   @default("1") @db.Char(1) //❌
+    fecha_creacion      DateTime? @default(now()) //❌
+    fecha_actualizacion DateTime? //❌
+
+    venta    Venta    @relation(fields: [id_venta], references: [id_venta], onUpdate: Cascade, onDelete: Cascade)
+    producto Producto @relation(fields: [id_producto], references: [id_producto], onUpdate: Cascade, onDelete: Cascade)
+
+    @@map("detalle_venta")
+}
